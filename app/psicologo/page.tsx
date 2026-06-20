@@ -112,7 +112,7 @@ export default function PsicologoPage() {
   return (
     <div className="flex h-screen" style={{ backgroundColor: '#E7ECFB' }}>
       {/* Sidebar */}
-      <div className="w-72 flex flex-col m-4 mr-0 bg-white rounded-3xl overflow-hidden">
+      <div className={`${usuarioSeleccionado ? 'hidden md:flex' : 'flex'} w-full md:w-72 flex-col m-4 md:mr-0 bg-white rounded-3xl overflow-hidden`}>
         <div className="px-5 py-5 border-b border-gray-100">
           <div className="flex items-center justify-between mb-1">
             <img src="/Mesa-de-trabajo-2-copia-10@4x.png" alt="Estoy Cool" className="h-8 w-auto" />
@@ -154,7 +154,7 @@ export default function PsicologoPage() {
       </div>
 
       {/* Área principal */}
-      <div className="flex-1 flex flex-col m-4 bg-white rounded-3xl overflow-hidden">
+      <div className={`${usuarioSeleccionado ? 'flex' : 'hidden md:flex'} flex-1 flex-col m-4 bg-white rounded-3xl overflow-hidden`}>
         {!usuarioSeleccionado ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
@@ -168,6 +168,13 @@ export default function PsicologoPage() {
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setUsuarioSeleccionado(null)}
+                  className="md:hidden mr-1 text-sm font-medium"
+                  style={{ color: '#888' }}
+                >
+                  ← Volver
+                </button>
                 <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white"
                   style={{ backgroundColor: '#18181f' }}>
                   {usuarioSeleccionado.nombre.charAt(0).toUpperCase()}
