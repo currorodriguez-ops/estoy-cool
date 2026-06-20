@@ -117,10 +117,19 @@ export default function PsicologoPage() {
     })
   }
 
+  const mostrarSidebar = !isMobile || !usuarioSeleccionado
+  const mostrarChat = !isMobile || !!usuarioSeleccionado
+
   return (
     <div className="flex h-screen" style={{ backgroundColor: '#E7ECFB' }}>
       {/* Sidebar */}
-      <div style={{ display: isMobile && usuarioSeleccionado ? 'none' : 'flex' }} className="w-full md:w-72 flex-col m-4 md:mr-0 bg-white rounded-3xl overflow-hidden">
+      <div style={{
+        display: mostrarSidebar ? 'flex' : 'none',
+        width: isMobile ? 'calc(100% - 32px)' : '288px',
+        flexShrink: 0,
+        margin: '16px',
+        marginRight: isMobile ? '16px' : '0',
+      }} className="flex-col bg-white rounded-3xl overflow-hidden">
         <div className="px-5 py-5 border-b border-gray-100">
           <div className="flex items-center justify-between mb-1">
             <img src="/Mesa-de-trabajo-2-copia-10@4x.png" alt="Estoy Cool" className="h-8 w-auto" />
@@ -162,7 +171,7 @@ export default function PsicologoPage() {
       </div>
 
       {/* Área principal */}
-      <div style={{ display: isMobile && !usuarioSeleccionado ? 'none' : 'flex' }} className="flex-1 flex-col m-4 bg-white rounded-3xl overflow-hidden">
+      <div style={{ display: mostrarChat ? 'flex' : 'none' }} className="flex-1 flex-col m-4 bg-white rounded-3xl overflow-hidden">
         {!usuarioSeleccionado ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
