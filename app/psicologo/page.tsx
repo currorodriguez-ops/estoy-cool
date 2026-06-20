@@ -212,8 +212,9 @@ export default function PsicologoPage() {
                 <button key={s.id} onClick={() => seleccionarSesion(s)}
                   style={{ width: '100%', textAlign: 'left', padding: '16px 20px', borderBottom: '1px solid #f8f8f8', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'white' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#F0F0F6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="5" width="18" height="13" rx="3"/>
+                      <path d="M8 21l4-4h5"/>
                     </svg>
                   </div>
                   <div style={{ flex: 1 }}>
