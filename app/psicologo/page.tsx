@@ -38,6 +38,9 @@ export default function PsicologoPage() {
   const [analisis, setAnalisis] = useState('')
   const [cargandoAnalisis, setCargandoAnalisis] = useState(false)
   const [pantalla, setPantalla] = useState<Pantalla>('lista')
+  const [notas, setNotas] = useState('')
+  const [guardandoNotas, setGuardandoNotas] = useState(false)
+  const [notasGuardadas, setNotasGuardadas] = useState(false)
 
   useEffect(() => {
     async function verificarAcceso() {
@@ -70,15 +73,27 @@ export default function PsicologoPage() {
   async function seleccionarUsuario(usuario: Usuario) {
     setUsuarioSeleccionado(usuario)
     setAnalisis('')
+    setNotasGuardadas(false)
     setCargando(true)
-    const { data } = await supabase
-      .from('sesiones')
-      .select('id, created_at')
-      .eq('usuario_id', usuario.id)
-      .order('created_at', { ascending: false })
-    if (data) setSesiones(data)
+
+    const [{ data: sesionesData }, { data: usuarioData }] = await Promise.all([
+      supabase.from('sesiones').select('id, created_at').eq('usuario_id', usuario.id).order('created_at', { ascending: false }),
+      supabase.from('usuarios').select('notas_psicologo').eq('id', usuario.id).single(),
+    ])
+
+    if (sesionesData) setSesiones(sesionesData)
+    if (usuarioData) setNotas(usuarioData.notas_psicologo || '')
     setCargando(false)
     setPantalla('sesiones')
+  }
+
+  async function guardarNotas() {
+    if (!usuarioSeleccionado) return
+    setGuardandoNotas(true)
+    await supabase.from('usuarios').update({ notas_psicologo: notas }).eq('id', usuarioSeleccionado.id)
+    setGuardandoNotas(false)
+    setNotasGuardadas(true)
+    setTimeout(() => setNotasGuardadas(false), 2000)
   }
 
   async function seleccionarSesion(sesion: Sesion) {
@@ -200,6 +215,24 @@ export default function PsicologoPage() {
               style={{ fontSize: '11px', fontWeight: '700', backgroundColor: '#FFD400', color: '#18181f', padding: '6px 12px', borderRadius: '999px' }}>
               Análisis IA
             </button>
+          </div>
+
+          {/* Notas del psicólogo */}
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid #f0f0f0' }}>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: '#18181f', marginBottom: '8px' }}>Mis notas</p>
+            <textarea
+              value={notas}
+              onChange={(e) => { setNotas(e.target.value); setNotasGuardadas(false) }}
+              placeholder="Escribe aquí tus apuntes sobre este paciente..."
+              rows={4}
+              style={{ width: '100%', fontSize: '13px', color: '#18181f', border: '1.5px solid #E0E0E0', borderRadius: '12px', padding: '10px 12px', resize: 'none', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <button onClick={guardarNotas} disabled={guardandoNotas}
+                style={{ fontSize: '12px', fontWeight: '700', backgroundColor: notasGuardadas ? '#E0F0E0' : '#FFD400', color: notasGuardadas ? '#2a7a2a' : '#18181f', padding: '6px 16px', borderRadius: '999px', opacity: guardandoNotas ? 0.6 : 1 }}>
+                {notasGuardadas ? '✓ Guardado' : guardandoNotas ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
           </div>
 
           <div>
