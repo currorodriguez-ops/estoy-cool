@@ -15,6 +15,8 @@ type Usuario = {
   id: string
   nombre: string
   email: string
+  ultima_visita_psicologo: string | null
+  ultimo_mensaje?: string | null
 }
 
 type Sesion = {
@@ -64,10 +66,24 @@ export default function PsicologoPage() {
   async function cargarUsuarios(psicologoId: string) {
     const { data } = await supabase
       .from('usuarios')
-      .select('*')
+      .select('id, nombre, email, ultima_visita_psicologo')
       .eq('psicologo_id', psicologoId)
       .order('created_at', { ascending: false })
-    if (data) setUsuarios(data)
+
+    if (!data) return
+
+    const usuariosConActividad = await Promise.all(data.map(async (u) => {
+      const { data: ultimo } = await supabase
+        .from('conversaciones')
+        .select('created_at')
+        .eq('usuario_id', u.id)
+        .eq('rol', 'user')
+        .order('created_at', { ascending: false })
+        .limit(1)
+      return { ...u, ultimo_mensaje: ultimo?.[0]?.created_at || null }
+    }))
+
+    setUsuarios(usuariosConActividad)
   }
 
   async function seleccionarUsuario(usuario: Usuario) {
@@ -76,10 +92,16 @@ export default function PsicologoPage() {
     setNotasGuardadas(false)
     setCargando(true)
 
+    const ahora = new Date().toISOString()
+
     const [{ data: sesionesData }, { data: usuarioData }] = await Promise.all([
       supabase.from('sesiones').select('id, created_at').eq('usuario_id', usuario.id).order('created_at', { ascending: false }),
       supabase.from('usuarios').select('notas_psicologo').eq('id', usuario.id).single(),
     ])
+
+    await supabase.from('usuarios').update({ ultima_visita_psicologo: ahora }).eq('id', usuario.id)
+
+    setUsuarios(prev => prev.map(u => u.id === usuario.id ? { ...u, ultima_visita_psicologo: ahora } : u))
 
     if (sesionesData) setSesiones(sesionesData)
     if (usuarioData) setNotas(usuarioData.notas_psicologo || '')
@@ -177,19 +199,31 @@ export default function PsicologoPage() {
             {usuarios.length === 0 ? (
               <p style={{ textAlign: 'center', color: '#aaa', fontSize: '14px', padding: '48px 16px' }}>No hay pacientes vinculados aún</p>
             ) : (
-              usuarios.map((u) => (
-                <button key={u.id} onClick={() => seleccionarUsuario(u)}
-                  style={{ width: '100%', textAlign: 'left', padding: '16px 20px', borderBottom: '1px solid #f8f8f8', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'white' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#F0F0F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '14px', color: '#18181f', flexShrink: 0 }}>
-                    {u.nombre.charAt(0).toUpperCase()}
-                  </div>
-                  <div style={{ flex: 1, overflow: 'hidden' }}>
-                    <p style={{ fontWeight: '600', fontSize: '14px', color: '#18181f' }}>{u.nombre}</p>
-                    <p style={{ fontSize: '12px', color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.email}</p>
-                  </div>
-                  <span style={{ color: '#ccc', fontSize: '18px' }}>›</span>
-                </button>
-              ))
+              usuarios.map((u) => {
+                const tieneNoLeidos = u.ultimo_mensaje && (
+                  !u.ultima_visita_psicologo || new Date(u.ultimo_mensaje) > new Date(u.ultima_visita_psicologo)
+                )
+                return (
+                  <button key={u.id} onClick={() => seleccionarUsuario(u)}
+                    style={{ width: '100%', textAlign: 'left', padding: '16px 20px', borderBottom: '1px solid #f8f8f8', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'white' }}>
+                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#F0F0F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '14px', color: '#18181f' }}>
+                        {u.nombre.charAt(0).toUpperCase()}
+                      </div>
+                      {tieneNoLeidos && (
+                        <div style={{ position: 'absolute', top: 0, right: 0, width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#FF3B30', border: '2px solid white' }} />
+                      )}
+                    </div>
+                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                      <p style={{ fontWeight: tieneNoLeidos ? '700' : '600', fontSize: '14px', color: '#18181f' }}>{u.nombre}</p>
+                      <p style={{ fontSize: '12px', color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {u.ultimo_mensaje ? `Último mensaje: ${formatearFecha(u.ultimo_mensaje)}` : u.email}
+                      </p>
+                    </div>
+                    <span style={{ color: '#ccc', fontSize: '18px' }}>›</span>
+                  </button>
+                )
+              })
             )}
           </div>
         </div>
