@@ -29,6 +29,14 @@ export default function PsicologoPage() {
   const [vista, setVista] = useState<Vista>('conversacion')
   const [analisis, setAnalisis] = useState('')
   const [cargandoAnalisis, setCargandoAnalisis] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     async function verificarAcceso() {
@@ -112,7 +120,7 @@ export default function PsicologoPage() {
   return (
     <div className="flex h-screen" style={{ backgroundColor: '#E7ECFB' }}>
       {/* Sidebar */}
-      <div className={`${usuarioSeleccionado ? 'hidden md:flex' : 'flex'} w-full md:w-72 flex-col m-4 md:mr-0 bg-white rounded-3xl overflow-hidden`}>
+      <div style={{ display: isMobile && usuarioSeleccionado ? 'none' : 'flex' }} className="w-full md:w-72 flex-col m-4 md:mr-0 bg-white rounded-3xl overflow-hidden">
         <div className="px-5 py-5 border-b border-gray-100">
           <div className="flex items-center justify-between mb-1">
             <img src="/Mesa-de-trabajo-2-copia-10@4x.png" alt="Estoy Cool" className="h-8 w-auto" />
@@ -154,7 +162,7 @@ export default function PsicologoPage() {
       </div>
 
       {/* Área principal */}
-      <div className={`${usuarioSeleccionado ? 'flex' : 'hidden md:flex'} flex-1 flex-col m-4 bg-white rounded-3xl overflow-hidden`}>
+      <div style={{ display: isMobile && !usuarioSeleccionado ? 'none' : 'flex' }} className="flex-1 flex-col m-4 bg-white rounded-3xl overflow-hidden">
         {!usuarioSeleccionado ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
