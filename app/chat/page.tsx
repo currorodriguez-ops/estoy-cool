@@ -73,8 +73,8 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#E7ECFB' }}>
-      <div className="w-full max-w-2xl bg-white rounded-3xl overflow-hidden shadow-sm flex flex-col" style={{ height: '90vh' }}>
+    <div style={{ display: 'flex', height: '100dvh', backgroundColor: '#E7ECFB', padding: '16px', boxSizing: 'border-box', overflow: 'hidden' }}>
+      <div style={{ flex: 1, backgroundColor: 'white', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxWidth: '672px', margin: '0 auto', width: '100%' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <img src="/Mesa-de-trabajo-2-copia-10@4x.png" alt="Estoy Cool" className="h-8 w-auto" />
