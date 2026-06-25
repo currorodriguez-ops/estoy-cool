@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { enviarCodigoPsicologo } from '@/lib/email'
 
 function generarCodigo(): string {
   const letras = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
@@ -39,6 +40,12 @@ export async function POST(req: NextRequest) {
       })
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+      try {
+        await enviarCodigoPsicologo(email, nombre, codigo)
+      } catch (emailError) {
+        console.error('Error enviando email:', emailError)
+      }
 
       return NextResponse.json({ codigo })
     }
