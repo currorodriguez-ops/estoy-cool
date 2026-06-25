@@ -139,6 +139,11 @@ export default function LoginPage() {
               Regístrate
             </Link>
           </p>
+          <p className="text-center text-sm mt-2">
+            <Link href="/recuperar" className="text-sm underline" style={{ color: '#aaa' }}>
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </p>
         </div>
       </div>
     </div>

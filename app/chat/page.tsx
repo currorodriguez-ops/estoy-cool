@@ -13,12 +13,7 @@ export default function ChatPage() {
   const router = useRouter()
   const [usuarioId, setUsuarioId] = useState<string | null>(null)
   const [nombreUsuario, setNombreUsuario] = useState('')
-  const [mensajes, setMensajes] = useState<Mensaje[]>([
-    {
-      rol: 'assistant',
-      texto: 'Hola, soy tu acompañante de Estoy Cool. Estoy aquí para escucharte, sin juicios y a tu ritmo. ¿Cómo te sientes hoy?',
-    },
-  ])
+  const [mensajes, setMensajes] = useState<Mensaje[]>([])
   const [input, setInput] = useState('')
   const [cargando, setCargando] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -29,7 +24,14 @@ export default function ChatPage() {
       if (!user) { router.push('/login'); return }
       setUsuarioId(user.id)
       const { data } = await supabase.from('usuarios').select('nombre').eq('id', user.id).single()
-      if (data) setNombreUsuario(data.nombre)
+      if (data) {
+        setNombreUsuario(data.nombre)
+        const nombre = data.nombre.split(' ')[0]
+        setMensajes([{
+          rol: 'assistant',
+          texto: `Hola ${nombre}, me alegra que estés aquí. Estoy para escucharte, sin prisas y sin juicios. ¿Cómo te sientes hoy?`,
+        }])
+      }
     }
     cargarUsuario()
   }, [router])
