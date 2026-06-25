@@ -62,7 +62,11 @@ export default function ChatPage() {
         body: JSON.stringify({ mensaje: input, usuarioId, historial: historialParaAPI }),
       })
       const data = await res.json()
-      setMensajes((prev) => [...prev, { rol: 'assistant', texto: data.respuesta || 'Lo siento, hubo un error.' }])
+      if (res.status === 429) {
+        setMensajes((prev) => [...prev, { rol: 'assistant', texto: data.error }])
+      } else {
+        setMensajes((prev) => [...prev, { rol: 'assistant', texto: data.respuesta || 'Lo siento, hubo un error.' }])
+      }
     } catch {
       setMensajes((prev) => [...prev, { rol: 'assistant', texto: 'Hubo un problema de conexión. Inténtalo de nuevo.' }])
     } finally {

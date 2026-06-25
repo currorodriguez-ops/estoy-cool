@@ -32,6 +32,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Faltan datos' }, { status: 400 })
     }
 
+    const hoy = new Date()
+    hoy.setHours(0, 0, 0, 0)
+    const { count } = await supabaseAdmin
+      .from('conversaciones')
+      .select('id', { count: 'exact', head: true })
+      .eq('usuario_id', usuarioId)
+      .eq('rol', 'user')
+      .gte('created_at', hoy.toISOString())
+
+    if ((count ?? 0) >= 50) {
+      return NextResponse.json({ error: 'Has alcanzado el límite de 50 mensajes por día. Vuelve mañana.' }, { status: 429 })
+    }
+
     const sesionId = await obtenerOCrearSesionHoy(usuarioId)
 
     await supabaseAdmin.from('conversaciones').insert({
