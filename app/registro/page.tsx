@@ -17,11 +17,18 @@ export default function RegistroPage() {
   const [codigoGenerado, setCodigoGenerado] = useState('')
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
+  const [aceptaPrivacidad, setAceptaPrivacidad] = useState(false)
 
   async function handleRegistro(e: React.FormEvent) {
     e.preventDefault()
     setCargando(true)
     setError('')
+
+    if (!aceptaPrivacidad) {
+      setError('Debes aceptar la política de privacidad para continuar')
+      setCargando(false)
+      return
+    }
 
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres')
@@ -183,6 +190,23 @@ export default function RegistroPage() {
               </div>
             )}
 
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={aceptaPrivacidad}
+                onChange={(e) => setAceptaPrivacidad(e.target.checked)}
+                className="mt-0.5 flex-shrink-0"
+                style={{ width: '16px', height: '16px', accentColor: '#FFD400' }}
+              />
+              <span className="text-xs" style={{ color: '#888' }}>
+                He leído y acepto la{' '}
+                <Link href="/privacidad" target="_blank" className="underline font-semibold" style={{ color: '#18181f' }}>
+                  política de privacidad
+                </Link>
+                {' '}y consiento que mis conversaciones sean accesibles por mi psicólogo asignado con fines terapéuticos.
+              </span>
+            </label>
+
             {error && (
               <p className="text-sm px-3 py-2 rounded-xl" style={{ backgroundColor: '#FFF0F0', color: '#CC0000' }}>{error}</p>
             )}
@@ -204,11 +228,6 @@ export default function RegistroPage() {
             </Link>
           </p>
 
-          {rol === 'paciente' && (
-            <p className="text-center text-xs mt-4 px-2" style={{ color: '#aaa' }}>
-              Al registrarte aceptas que tus conversaciones sean accesibles por tu psicólogo asignado con fines terapéuticos.
-            </p>
-          )}
         </div>
       </div>
     </div>
