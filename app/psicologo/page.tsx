@@ -197,15 +197,21 @@ export default function PsicologoPage() {
             {nombrePsicologo && <p style={{ fontSize: '12px', fontWeight: '700', color: '#18181f', marginTop: '8px' }}>{nombrePsicologo}</p>}
             <p style={{ fontSize: '12px', color: '#aaa', marginTop: '2px' }}>{usuarios.length} paciente{usuarios.length !== 1 ? 's' : ''}</p>
             {codigoPsicologo && (
-              <button onClick={() => setMostrarCodigo(!mostrarCodigo)}
-                style={{ marginTop: '8px', fontSize: '11px', color: '#888', textDecoration: 'underline' }}>
-                {mostrarCodigo ? 'Ocultar código' : 'Ver mi código'}
-              </button>
-            )}
-            {mostrarCodigo && (
-              <div style={{ marginTop: '6px', backgroundColor: '#F0F0F6', borderRadius: '10px', padding: '8px 12px', display: 'inline-block' }}>
-                <p style={{ fontSize: '11px', color: '#aaa', marginBottom: '2px' }}>Tu código</p>
-                <p style={{ fontSize: '18px', fontWeight: '900', letterSpacing: '4px', color: '#18181f' }}>{codigoPsicologo}</p>
+              <div style={{ marginTop: '10px' }}>
+                <button onClick={() => setMostrarCodigo(!mostrarCodigo)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#aaa' }}>
+                  <span>Código de acceso</span>
+                  <span style={{ fontSize: '10px' }}>{mostrarCodigo ? '▲' : '▼'}</span>
+                </button>
+                {mostrarCodigo && (
+                  <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: '#FFFBE6', border: '1.5px solid #FFD400', borderRadius: '12px', padding: '8px 14px' }}>
+                    <p style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '5px', color: '#18181f', margin: 0 }}>{codigoPsicologo}</p>
+                    <button onClick={() => navigator.clipboard.writeText(codigoPsicologo)}
+                      style={{ fontSize: '11px', color: '#888', marginLeft: 'auto', flexShrink: 0 }}>
+                      Copiar
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
