@@ -43,6 +43,8 @@ export default function PsicologoPage() {
   const [notas, setNotas] = useState('')
   const [guardandoNotas, setGuardandoNotas] = useState(false)
   const [notasGuardadas, setNotasGuardadas] = useState(false)
+  const [codigoPsicologo, setCodigoPsicologo] = useState('')
+  const [mostrarCodigo, setMostrarCodigo] = useState(false)
 
   useEffect(() => {
     async function verificarAcceso() {
@@ -51,13 +53,14 @@ export default function PsicologoPage() {
 
       const { data: psicologo } = await supabase
         .from('psicologos')
-        .select('id, nombre')
+        .select('id, nombre, codigo')
         .eq('email', user.email)
         .single()
 
       if (!psicologo) { router.push('/chat'); return }
 
       setNombrePsicologo(psicologo.nombre)
+      setCodigoPsicologo(psicologo.codigo)
       cargarUsuarios(psicologo.id)
     }
     verificarAcceso()
@@ -193,6 +196,18 @@ export default function PsicologoPage() {
             </div>
             {nombrePsicologo && <p style={{ fontSize: '12px', fontWeight: '700', color: '#18181f', marginTop: '8px' }}>{nombrePsicologo}</p>}
             <p style={{ fontSize: '12px', color: '#aaa', marginTop: '2px' }}>{usuarios.length} paciente{usuarios.length !== 1 ? 's' : ''}</p>
+            {codigoPsicologo && (
+              <button onClick={() => setMostrarCodigo(!mostrarCodigo)}
+                style={{ marginTop: '8px', fontSize: '11px', color: '#888', textDecoration: 'underline' }}>
+                {mostrarCodigo ? 'Ocultar código' : 'Ver mi código'}
+              </button>
+            )}
+            {mostrarCodigo && (
+              <div style={{ marginTop: '6px', backgroundColor: '#F0F0F6', borderRadius: '10px', padding: '8px 12px', display: 'inline-block' }}>
+                <p style={{ fontSize: '11px', color: '#aaa', marginBottom: '2px' }}>Tu código</p>
+                <p style={{ fontSize: '18px', fontWeight: '900', letterSpacing: '4px', color: '#18181f' }}>{codigoPsicologo}</p>
+              </div>
+            )}
           </div>
 
           <div>
