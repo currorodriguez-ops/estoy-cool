@@ -16,6 +16,7 @@ export default function ChatPage() {
   const [mensajes, setMensajes] = useState<Mensaje[]>([])
   const [input, setInput] = useState('')
   const [cargando, setCargando] = useState(false)
+  const [mensajesHoy, setMensajesHoy] = useState(0)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -32,6 +33,16 @@ export default function ChatPage() {
           texto: `Hola ${nombre}, me alegra que estés aquí. Estoy para escucharte, sin prisas y sin juicios. ¿Cómo te sientes hoy?`,
         }])
       }
+
+      const hoy = new Date()
+      hoy.setHours(0, 0, 0, 0)
+      const { count } = await supabase
+        .from('conversaciones')
+        .select('id', { count: 'exact', head: true })
+        .eq('usuario_id', user.id)
+        .eq('rol', 'user')
+        .gte('created_at', hoy.toISOString())
+      setMensajesHoy(count ?? 0)
     }
     cargarUsuario()
   }, [router])
@@ -66,6 +77,7 @@ export default function ChatPage() {
         setMensajes((prev) => [...prev, { rol: 'assistant', texto: data.error }])
       } else {
         setMensajes((prev) => [...prev, { rol: 'assistant', texto: data.respuesta || 'Lo siento, hubo un error.' }])
+        setMensajesHoy((prev) => prev + 1)
       }
     } catch {
       setMensajes((prev) => [...prev, { rol: 'assistant', texto: 'Hubo un problema de conexión. Inténtalo de nuevo.' }])
@@ -84,6 +96,9 @@ export default function ChatPage() {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <img src="/Mesa-de-trabajo-2-copia-10@4x.png" alt="Estoy Cool" className="h-8 w-auto" />
+          <span className="text-xs font-medium" style={{ color: mensajesHoy >= 45 ? '#FF3B30' : '#aaa' }}>
+            {mensajesHoy}/50
+          </span>
           <button
             onClick={cerrarSesion}
             className="text-sm font-medium"
