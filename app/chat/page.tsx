@@ -75,6 +75,8 @@ export default function ChatPage() {
       const data = await res.json()
       if (res.status === 429) {
         setMensajes((prev) => [...prev, { rol: 'assistant', texto: data.error }])
+      } else if (!res.ok) {
+        setMensajes((prev) => [...prev, { rol: 'assistant', texto: `Error: ${data.error || 'desconocido'}` }])
       } else {
         setMensajes((prev) => [...prev, { rol: 'assistant', texto: data.respuesta || 'Lo siento, hubo un error.' }])
         setMensajesHoy((prev) => prev + 1)

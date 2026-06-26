@@ -96,7 +96,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ respuesta: textoRespuesta })
   } catch (error) {
-    console.error('Error en chat:', error)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error('Error en chat:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
