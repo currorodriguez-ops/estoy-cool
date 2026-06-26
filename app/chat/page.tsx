@@ -25,14 +25,17 @@ export default function ChatPage() {
       if (!user) { router.push('/login'); return }
       setUsuarioId(user.id)
       const { data } = await supabase.from('usuarios').select('nombre').eq('id', user.id).single()
-      if (data) {
-        setNombreUsuario(data.nombre)
-        const nombre = data.nombre.split(' ')[0]
-        setMensajes([{
-          rol: 'assistant',
-          texto: `Hola ${nombre}, me alegra que estés aquí. Estoy para escucharte, sin prisas y sin juicios. ¿Cómo te sientes hoy?`,
-        }])
+      if (!data) {
+        await supabase.auth.signOut()
+        router.push('/registro')
+        return
       }
+      setNombreUsuario(data.nombre)
+      const nombre = data.nombre.split(' ')[0]
+      setMensajes([{
+        rol: 'assistant',
+        texto: `Hola ${nombre}, me alegra que estés aquí. Estoy para escucharte, sin prisas y sin juicios. ¿Cómo te sientes hoy?`,
+      }])
 
       const hoy = new Date()
       hoy.setHours(0, 0, 0, 0)
