@@ -2,26 +2,41 @@ import { NextRequest, NextResponse } from 'next/server'
 import { deepseek, SYSTEM_PROMPT } from '@/lib/deepseek'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-async function obtenerOCrearSesionHoy(usuarioId: string): Promise<string> {
-  const hoy = new Date()
-  hoy.setHours(0, 0, 0, 0)
+async function obtenerOCrearSesionHoy(usuarioId: string): Promise<string | null> {
+  try {
+    const hoy = new Date()
+    hoy.setHours(0, 0, 0, 0)
 
-  const { data: sesiones } = await supabaseAdmin
-    .from('sesiones')
-    .select('id')
-    .eq('usuario_id', usuarioId)
-    .gte('created_at', hoy.toISOString())
-    .limit(1)
+    const { data: sesiones, error: errSelect } = await supabaseAdmin
+      .from('sesiones')
+      .select('id')
+      .eq('usuario_id', usuarioId)
+      .gte('created_at', hoy.toISOString())
+      .limit(1)
 
-  if (sesiones && sesiones.length > 0) return sesiones[0].id
+    if (errSelect) {
+      console.error('Error buscando sesión:', errSelect)
+      return null
+    }
 
-  const { data: nueva } = await supabaseAdmin
-    .from('sesiones')
-    .insert({ usuario_id: usuarioId })
-    .select('id')
-    .single()
+    if (sesiones && sesiones.length > 0) return sesiones[0].id
 
-  return nueva!.id
+    const { data: nueva, error: errInsert } = await supabaseAdmin
+      .from('sesiones')
+      .insert({ usuario_id: usuarioId })
+      .select('id')
+      .single()
+
+    if (errInsert) {
+      console.error('Error creando sesión:', errInsert)
+      return null
+    }
+
+    return nueva!.id
+  } catch (e) {
+    console.error('Error en sesión:', e)
+    return null
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -47,12 +62,15 @@ export async function POST(req: NextRequest) {
 
     const sesionId = await obtenerOCrearSesionHoy(usuarioId)
 
-    await supabaseAdmin.from('conversaciones').insert({
+    const insertPayload: Record<string, unknown> = {
       usuario_id: usuarioId,
-      sesion_id: sesionId,
       mensaje,
       rol: 'user',
-    })
+    }
+    if (sesionId) insertPayload.sesion_id = sesionId
+
+    const { error: errConv } = await supabaseAdmin.from('conversaciones').insert(insertPayload)
+    if (errConv) console.error('Error guardando mensaje usuario:', errConv)
 
     const mensajes = [
       { role: 'system', content: SYSTEM_PROMPT },
@@ -68,12 +86,13 @@ export async function POST(req: NextRequest) {
 
     const textoRespuesta = respuesta.choices[0].message.content || ''
 
-    await supabaseAdmin.from('conversaciones').insert({
+    const insertRespuesta: Record<string, unknown> = {
       usuario_id: usuarioId,
-      sesion_id: sesionId,
       mensaje: textoRespuesta,
       rol: 'assistant',
-    })
+    }
+    if (sesionId) insertRespuesta.sesion_id = sesionId
+    await supabaseAdmin.from('conversaciones').insert(insertRespuesta)
 
     return NextResponse.json({ respuesta: textoRespuesta })
   } catch (error) {
